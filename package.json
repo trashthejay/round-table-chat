@@ -1,0 +1,11 @@
+{
+  "name": "round-table",
+  "version": "0.1.1",
+  "private": true,
+  "description": "One window where Claude, Gemini and Muse see each other's replies. No API keys.",
+  "scripts": {
+    "start": "node server.js",
+    "demo": "node server.js --mock",
+    "test": "node test.js"
+  }
+}

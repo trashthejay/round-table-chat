@@ -1,0 +1,8 @@
+{
+  "port": 3737,
+  "agents": [
+    { "name": "Claude", "type": "cli", "command": "claude", "args": ["-p"], "promptVia": "stdin" },
+    { "name": "Gemini", "type": "cli", "command": "gemini", "args": ["-p"], "promptVia": "arg" },
+    { "name": "Muse", "type": "manual" }
+  ]
+}
