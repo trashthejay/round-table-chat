@@ -6,6 +6,14 @@ const { Room } = require('./room');
 const { cliAdapter, mockAdapter } = require('./adapters');
 
 const config = JSON.parse(fs.readFileSync(path.join(__dirname, 'config.json'), 'utf8'));
+// Version info: single source of truth is package.json (version) and the latest CHANGELOG.md entry (date).
+const VERSION = (() => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version; } catch { return 'unknown'; } })();
+const UPDATED = (() => {
+  try {
+    const m = fs.readFileSync(path.join(__dirname, 'CHANGELOG.md'), 'utf8').match(/^## \[[^\]]+\] - (\d{4}-\d{2}-\d{2})/m);
+    return m ? m[1] : 'unknown';
+  } catch { return 'unknown'; }
+})();
 const MOCK = process.argv.includes('--mock');
 const clients = new Set();
 const pendingManual = new Map(); // id -> resolve
@@ -67,6 +75,8 @@ const server = http.createServer(async (req, res) => {
         messages: room.messages,
         busy: room.busy,
         mock: MOCK,
+        version: VERSION,
+        updated: UPDATED,
       });
     }
     if (req.method === 'POST') {
