@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.5] - 2026-11-13
+### Changed
+- README.md: documents the Codex/ChatGPT agent, warns that Gemini is blocked on free personal Google accounts and that Muse makes the room wait for a paste, and updates usage notes.
+
 ## [0.1.4] - 2026-11-13
 ### Changed
 - public/index.html: in the question box, Enter now sends the message and Shift+Enter inserts a newline (Cmd/Ctrl+Enter still sends; IME composition is ignored); placeholder updated.
