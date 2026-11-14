@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.4] - 2026-11-13
+### Changed
+- public/index.html: in the question box, Enter now sends the message and Shift+Enter inserts a newline (Cmd/Ctrl+Enter still sends; IME composition is ignored); placeholder updated.
+
 ## [0.1.3] - 2026-11-13
 ### Added
 - config.json: new "Codex" CLI agent (`codex exec -s read-only --skip-git-repo-check --ephemeral -`, prompt via stdin).

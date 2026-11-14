@@ -50,7 +50,7 @@
   <button id="mskip">Skip</button>
 </div>
 <footer>
-  <textarea id="input" placeholder="Ask the room. Type @Name (like @Claude) to ask specific models. Cmd/Ctrl+Enter sends."></textarea>
+  <textarea id="input" placeholder="Ask the room. Type @Name (like @Claude) to ask specific models. Enter sends, Shift+Enter for a new line."></textarea>
   <label>How many turns?
     <select id="rounds"><option value="1" selected>Everyone answers once</option><option value="2">Answer, then react to each other</option><option value="3">Answer, react, then react again</option></select>
   </label>
@@ -129,7 +129,12 @@ $('send').onclick = async () => {
   const r = await post('/api/ask', { text, agents: names, rounds: Number($('rounds').value) });
   if (r.ok) $('input').value = ''; else setBusy(false);
 };
-$('input').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) $('send').click(); });
+$('input').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
+  if (e.shiftKey && !(e.metaKey || e.ctrlKey)) return; // Shift+Enter: newline
+  e.preventDefault();
+  if (!$('send').disabled) $('send').click();
+});
 $('stop').onclick = () => post('/api/stop');
 $('clear').onclick = () => confirm('Clear the whole transcript?') && post('/api/clear');
 $('mcopy').onclick = () => navigator.clipboard.writeText($('mprompt').value);
