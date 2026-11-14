@@ -3,6 +3,7 @@
   "agents": [
     { "name": "Claude", "type": "cli", "command": "claude", "args": ["-p"], "promptVia": "stdin" },
     { "name": "Gemini", "type": "cli", "command": "gemini", "args": ["-p"], "promptVia": "arg" },
+    { "name": "Codex", "type": "cli", "command": "codex", "args": ["exec", "-s", "read-only", "--skip-git-repo-check", "--ephemeral", "-"], "promptVia": "stdin" },
     { "name": "Muse", "type": "manual" }
   ]
 }

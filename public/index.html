@@ -24,6 +24,7 @@
   footer { padding:10px 16px; background:var(--card); border-top:1px solid var(--line); display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; }
   #input { flex:1; min-width:240px; height:60px; resize:vertical; font:inherit; padding:8px; border:1px solid var(--line); border-radius:8px; }
   button, select { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; }
+  #rounds { max-width:100%; }
   button.primary { background:#1d1d1b; color:#fff; border-color:#1d1d1b; }
   button:disabled { opacity:.5; cursor:default; }
   .hint { font-size:12px; color:var(--muted); width:100%; }
@@ -49,13 +50,13 @@
   <button id="mskip">Skip</button>
 </div>
 <footer>
-  <textarea id="input" placeholder="Ask the room. Use @Claude, @Gemini or @Muse to address specific agents. Cmd/Ctrl+Enter sends."></textarea>
-  <label>Rounds
-    <select id="rounds"><option>1</option><option>2</option><option>3</option></select>
+  <textarea id="input" placeholder="Ask the room. Type @Name (like @Claude) to ask specific models. Cmd/Ctrl+Enter sends."></textarea>
+  <label>How many turns?
+    <select id="rounds"><option value="1" selected>Everyone answers once</option><option value="2">Answer, then react to each other</option><option value="3">Answer, react, then react again</option></select>
   </label>
   <button class="primary" id="send">Send</button>
   <button id="stop" disabled>Stop</button>
-  <div class="hint">Round 1: everyone answers in parallel. Rounds 2+: each agent in turn sees everything said so far and responds to the others.</div>
+  <div class="hint">Everyone answers your question at the same time. With more turns, each model then reads what the others said and replies.</div>
 </footer>
 <script>
 const PALETTE = ['#2f6fdd','#c2570c','#2a8a5b','#8a3fb5','#b5365a','#4a7c8c'];
