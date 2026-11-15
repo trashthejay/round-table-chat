@@ -96,6 +96,20 @@ osacompile -s -o "$APP" "$SRC"
 # Make it stay open (so it lives in the Dock and receives quit/reopen events).
 /usr/libexec/PlistBuddy -c "Delete :OSAAppletStayOpen" "$APP/Contents/Info.plist" 2>/dev/null || true
 /usr/libexec/PlistBuddy -c "Add :OSAAppletStayOpen bool true" "$APP/Contents/Info.plist"
+# Use the project icon if present (assets/icon-1024.png becomes the app's applet.icns).
+ICON_SRC="$PROJECT_DIR/assets/icon-1024.png"
+if [ -f "$ICON_SRC" ] && command -v iconutil >/dev/null && command -v sips >/dev/null; then
+  ICONSET="$TMP/AppIcon.iconset"
+  mkdir -p "$ICONSET"
+  for s in 16 32 128 256 512; do
+    sips -z "$s" "$s" "$ICON_SRC" --out "$ICONSET/icon_${s}x${s}.png" >/dev/null
+    sips -z "$((s * 2))" "$((s * 2))" "$ICON_SRC" --out "$ICONSET/icon_${s}x${s}@2x.png" >/dev/null
+  done
+  iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/applet.icns"
+  # osacompile also adds a default icon asset catalog that macOS would prefer; drop it so applet.icns is used.
+  /usr/libexec/PlistBuddy -c "Delete :CFBundleIconName" "$APP/Contents/Info.plist" 2>/dev/null || true
+  rm -f "$APP/Contents/Resources/Assets.car"
+fi
 codesign --force --deep -s - "$APP" >/dev/null 2>&1 || true
 touch "$APP"
 

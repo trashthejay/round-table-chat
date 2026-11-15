@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.7] - 2026-11-15
+### Added
+- assets/icon-1024.png: the app icon (1024x1024 PNG, transparent corners).
+- scripts/make-mac-app.sh: converts the icon to applet.icns (sips/iconutil) and removes osacompile's default icon asset catalog so the app uses it.
+
 ## [0.1.6] - 2026-11-15
 ### Added
 - scripts/make-mac-app.sh: builds ~/Applications/Round Table Chat.app, which starts the server, opens the browser, and stops the server on Cmd+Q (skips starting a second server if port 3737 is in use).

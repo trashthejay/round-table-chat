@@ -17,6 +17,7 @@ npm start         # real agents, then open http://127.0.0.1:3737
 - Server output goes to `~/Library/Logs/RoundTableChat.log`.
 - The first time, macOS may ask permission to access the Desktop folder (the project lives under `~/Desktop`). Click Allow.
 - If you move the project folder or node, run the script again.
+- The app icon comes from `assets/icon-1024.png` and is applied when you run the script.
 
 ## Before you send your first message
 Agents start **all ticked**. Un-tick any you aren't using, or the room will wait on them:
