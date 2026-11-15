@@ -92,6 +92,21 @@ function showManual() {
   if (p) { $('mname').textContent = p.name; $('mprompt').value = p.prompt; $('mreply').value = ''; }
 }
 
+const AGENTS_KEY = 'roundtable.agents';
+function loadAgentSel() {
+  try {
+    const o = JSON.parse(localStorage.getItem(AGENTS_KEY));
+    return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+  } catch (e) { return {}; }
+}
+function saveAgentSel() {
+  try {
+    const o = {};
+    document.querySelectorAll('#agents input[type=checkbox]').forEach(c => (o[c.value] = c.checked));
+    localStorage.setItem(AGENTS_KEY, JSON.stringify(o));
+  } catch (e) {}
+}
+
 async function init() {
   const s = await (await fetch('/api/state')).json();
   agents = s.agents;
@@ -99,9 +114,11 @@ async function init() {
   $('version').textContent = `v${s.version} · updated ${s.updated}`;
   $('mockbadge').style.display = s.mock ? 'inline' : 'none';
   $('agents').innerHTML = '';
+  const saved = loadAgentSel();
   agents.forEach(a => {
     const l = document.createElement('label');
-    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true; cb.value = a.name;
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = saved[a.name] !== false; cb.value = a.name;
+    cb.addEventListener('change', saveAgentSel);
     const dot = document.createElement('span'); dot.className = 'dot'; dot.style.background = colorOf(a.name);
     l.append(cb, dot, document.createTextNode(a.name + (a.type === 'manual' ? ' (paste)' : '')));
     $('agents').appendChild(l);
@@ -125,6 +142,7 @@ $('send').onclick = async () => {
   const text = $('input').value.trim();
   if (!text) return;
   const names = [...document.querySelectorAll('#agents input:checked')].map(c => c.value);
+  saveAgentSel();
   setBusy(true);
   const r = await post('/api/ask', { text, agents: names, rounds: Number($('rounds').value) });
   if (r.ok) $('input').value = ''; else setBusy(false);

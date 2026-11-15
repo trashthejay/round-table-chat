@@ -24,6 +24,8 @@ Agents start **all ticked**. Un-tick any you aren't using, or the room will wait
 - Un-tick **Gemini** unless you have a working Gemini login (see the warning below).
 - Un-tick **Muse (paste)** unless you plan to paste a reply by hand (see the warning below).
 
+The page remembers your last agent selection, so you only need to untick Gemini and Muse once.
+
 ## How agents connect (config.json)
 - **Claude**: `claude -p` (Claude Code headless, uses your existing login). Run `claude` once to log in.
 - **Codex (ChatGPT)**: `codex exec` (OpenAI Codex CLI, sign in with your ChatGPT account). Install with `npm i -g @openai/codex`, then run `codex` once to log in. It runs with `-s read-only`, so it can't change files or run write commands from the chat room. Tested with a free ChatGPT account; your plan's usage limits still apply.

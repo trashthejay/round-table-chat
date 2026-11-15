@@ -1,6 +1,6 @@
 {
   "name": "round-table",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "description": "One window where Claude, Gemini and Muse see each other's replies. No API keys.",
   "scripts": {

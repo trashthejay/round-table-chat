@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.8] - 2026-11-15
+### Changed
+- public/index.html: the page remembers which agent checkboxes were ticked (localStorage key "roundtable.agents"); agents with no saved entry default to ticked.
+
 ## [0.1.7] - 2026-11-15
 ### Added
 - assets/icon-1024.png: the app icon (1024x1024 PNG, transparent corners).
