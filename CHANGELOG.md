@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.6] - 2026-11-15
+### Added
+- scripts/make-mac-app.sh: builds ~/Applications/Round Table Chat.app, which starts the server, opens the browser, and stops the server on Cmd+Q (skips starting a second server if port 3737 is in use).
+- README.md: "Launch like a Mac app" section.
+
 ## [0.1.5] - 2026-11-13
 ### Changed
 - README.md: documents the Codex/ChatGPT agent, warns that Gemini is blocked on free personal Google accounts and that Muse makes the room wait for a paste, and updates usage notes.

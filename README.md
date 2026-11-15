@@ -10,6 +10,14 @@ npm run demo      # try the UI with fake agents
 npm start         # real agents, then open http://127.0.0.1:3737
 ```
 
+## Launch like a Mac app
+- Run `bash scripts/make-mac-app.sh`. It builds `~/Applications/Round Table Chat.app`.
+- Double-click the app. It shows in the Dock, starts the server and opens http://127.0.0.1:3737. Clicking the Dock icon again reopens the page.
+- Cmd+Q stops the server. If a server was already running on port 3737, the app just opens the page and leaves that server alone.
+- Server output goes to `~/Library/Logs/RoundTableChat.log`.
+- The first time, macOS may ask permission to access the Desktop folder (the project lives under `~/Desktop`). Click Allow.
+- If you move the project folder or node, run the script again.
+
 ## Before you send your first message
 Agents start **all ticked**. Un-tick any you aren't using, or the room will wait on them:
 - Un-tick **Gemini** unless you have a working Gemini login (see the warning below).
