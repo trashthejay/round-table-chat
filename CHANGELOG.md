@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.10] - 2026-11-15
+### Changed
+- public/index.html: the header logo and browser-tab favicon now use the app icon (embedded as base64 PNG data URIs).
+
 ## [0.1.9] - 2026-11-15
 ### Changed
 - public/index.html: full UI redesign with messenger-style chat bubbles, seat pills at the top to pick agents, an inline Muse paste card inside the conversation, friendly "couldn't answer" notices with a Details toggle, inferred turn dividers, and a compact composer.
