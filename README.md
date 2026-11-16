@@ -8,6 +8,7 @@ cd round-table
 npm test          # offline check that every agent sees the others' replies
 npm run demo      # try the UI with fake agents
 npm start         # real agents, then open http://127.0.0.1:3737
+PORT=3811 npm start   # same, on another port
 ```
 
 ## Launch like a Mac app
@@ -20,11 +21,11 @@ npm start         # real agents, then open http://127.0.0.1:3737
 - The app icon comes from `assets/icon-1024.png` and is applied when you run the script.
 
 ## Before you send your first message
-Agents start **all ticked**. Un-tick any you aren't using, or the room will wait on them:
-- Un-tick **Gemini** unless you have a working Gemini login (see the warning below).
-- Un-tick **Muse (paste)** unless you plan to paste a reply by hand (see the warning below).
+Agents appear as seat pills at the top of the page and start **all selected**. Click a pill to deselect any you aren't using, or the room will wait on them:
+- Deselect **Gemini** unless you have a working Gemini login (see the warning below).
+- Deselect **Muse (paste)** unless you plan to paste a reply by hand (see the warning below).
 
-The page remembers your last agent selection, so you only need to untick Gemini and Muse once.
+The page remembers your last agent selection, so you only need to deselect Gemini and Muse once.
 
 ## How agents connect (config.json)
 - **Claude**: `claude -p` (Claude Code headless, uses your existing login). Run `claude` once to log in.
@@ -37,20 +38,21 @@ The page remembers your last agent selection, so you only need to untick Gemini 
 
 ### Gemini is currently blocked for free personal Google accounts
 Signing in with a free personal Google account fails with `IneligibleTierError: This client is no longer supported for Gemini Code Assist for individuals` (seen with Gemini CLI 0.68.0). Google asks users to move to its Antigravity products. This is on Google's side, and nothing in Round Table can fix it.
-- If you leave Gemini ticked, the room shows a red "Gemini failed" message and carries on with the other agents.
+- If you leave Gemini selected, the room shows a friendly "couldn't answer" notice (with a Details button for the raw error) and carries on with the other agents.
 - It may work with a paid or Workspace tier. Run `gemini`, then `/auth`, and try that account.
 - If you get it working: Round Table runs the CLI from your system temp folder, which Gemini treats as untrusted in headless mode. Add `"--skip-trust"` before `"-p"` in Gemini's `args` in `config.json`. Note this makes Gemini trust whatever is in the temp folder.
 
 ### Muse makes the room wait for you
-Muse has no CLI, so the room cannot get its reply by itself. When Muse is ticked, a yellow box appears **below the transcript, above the question box**, with a prompt for you to copy into another chat (ChatGPT, Perplexity, anything) and a place to paste the reply back.
-- Nothing else can run until you press **Send reply to room** or **Skip**. If the page looks stuck, scroll down to find the yellow box, or press **Stop**.
-- If you only want the CLI agents, un-tick Muse.
+Muse has no CLI, so the room cannot get its reply by itself. When Muse is selected, a paste card appears **inside the conversation**, with a prompt for you to copy into another chat (ChatGPT, Perplexity, anything) and a place to paste the reply back.
+- Nothing else can run until you press **Send reply to room** or **Skip**. If the page looks stuck, scroll to the paste card, or press **Stop**.
+- If you only want the CLI agents, deselect Muse.
 - Free-plan chats such as Perplexity have no command-line tool for this, so Muse is the way to include them.
 
 ## Using it
 - Enter sends your question. Shift+Enter adds a new line.
 - "How many turns?" has three choices: everyone answers once; answer, then react to each other; answer, react, then react again. In the first turn everyone answers in parallel. In later turns each agent in turn sees the whole transcript and responds to the others (capped at 5).
 - `@Claude`, `@Codex`, `@Muse` in a message sends it only to those agents.
+- Any agent that fails shows a friendly "couldn't answer" notice in the conversation; click Details to see the technical error. The room carries on with the others.
 - Stop cancels remaining turns. The transcript is saved to `transcript.json`. Clear resets it.
 
 ## Notes

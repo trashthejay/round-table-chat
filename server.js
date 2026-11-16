@@ -119,7 +119,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-const port = config.port || 3737;
+const port = Number(process.env.PORT) || config.port || 3737;
 server.listen(port, '127.0.0.1', () => {
   console.log(`Round Table running at http://127.0.0.1:${port}${MOCK ? '  (MOCK mode: no real agents)' : ''}`);
 });

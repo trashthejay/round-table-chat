@@ -5,79 +5,342 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Round Table</title>
 <style>
-  :root { --bg:#f6f5f2; --card:#fff; --ink:#1d1d1b; --muted:#6b6b66; --line:#e2e0da; }
-  * { box-sizing: border-box; }
-  body { margin:0; font:15px/1.5 -apple-system,system-ui,sans-serif; background:var(--bg); color:var(--ink); height:100vh; display:flex; flex-direction:column; }
-  header { padding:10px 16px; background:var(--card); border-bottom:1px solid var(--line); display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
-  header h1 { font-size:16px; margin:0; }
-  header label { display:flex; gap:6px; align-items:center; cursor:pointer; }
-  .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
-  .spacer { flex:1; }
-  #log { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; }
-  .msg { max-width:820px; padding:10px 14px; border-radius:12px; background:var(--card); border:1px solid var(--line); border-left-width:5px; white-space:pre-wrap; word-wrap:break-word; }
-  .msg .who { font-size:12px; font-weight:600; color:var(--muted); margin-bottom:2px; }
-  .msg.user { align-self:flex-end; background:#eceae4; }
-  .msg.system { color:#9a2b2b; border-left-color:#9a2b2b; font-size:13px; }
-  #typing { padding:0 16px 6px; color:var(--muted); font-size:13px; min-height:22px; }
-  #manual { display:none; background:#fff8e1; border-top:1px solid #f0d98a; padding:10px 16px; }
-  #manual textarea { width:100%; height:70px; margin:6px 0; font:13px monospace; }
-  footer { padding:10px 16px; background:var(--card); border-top:1px solid var(--line); display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; }
-  #input { flex:1; min-width:240px; height:60px; resize:vertical; font:inherit; padding:8px; border:1px solid var(--line); border-radius:8px; }
-  button, select { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; }
-  #rounds { max-width:100%; }
-  button.primary { background:#1d1d1b; color:#fff; border-color:#1d1d1b; }
-  button:disabled { opacity:.5; cursor:default; }
-  .hint { font-size:12px; color:var(--muted); width:100%; }
+  :root {
+    --navy:#1B2550; --navy-hover:#26346E;
+    --bg:#FAF8F2; --surface:#FFFFFF; --subtle:#F1EFE7;
+    --ink:#14192D; --ink2:#4B536E; --muted:#5F6784;
+    --line:rgba(27,37,80,.14); --line2:rgba(27,37,80,.26);
+    --amber-bg:#FEF6EB; --amber-line:#E5B567; --amber-ink:#7A3C07;
+    --focus:#2F6FDD;
+    --shadow-xs:0 1px 2px rgba(20,25,45,.05); --shadow-sm:0 2px 8px rgba(20,25,45,.07);
+  }
+  *, *::before, *::after { box-sizing:border-box; }
+  html, body { margin:0; height:100%; }
+  body { font:15px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif; background:var(--bg); color:var(--ink); display:flex; flex-direction:column; height:100dvh; -webkit-font-smoothing:antialiased; }
+  button, select, textarea { font:inherit; color:inherit; }
+  button { cursor:pointer; }
+  button:disabled { cursor:not-allowed; }
+  :focus-visible { outline:2px solid var(--focus); outline-offset:2px; }
+  [hidden] { display:none !important; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+  }
+
+  /* Header */
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px 16px; flex-wrap:wrap; padding:10px 24px; background:var(--surface); border-bottom:1px solid var(--line); flex-shrink:0; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .brand h1 { margin:0; font-size:.95rem; font-weight:700; }
+  .logo { width:30px; height:30px; border-radius:9px; background:var(--navy); color:#fff; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .seats { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .seat { display:inline-flex; align-items:center; gap:9px; padding:4px 12px 4px 5px; border-radius:999px; border:1.5px dashed var(--line2); background:var(--bg); text-align:left; transition:border-color .15s, background-color .15s; }
+  .seat[aria-pressed="true"] { border-style:solid; border-color:var(--c); background:var(--surface); box-shadow:inset 0 0 0 1px var(--c); }
+  .seat:hover { border-color:var(--c); }
+  .seat .av { background:var(--c); }
+  .seat[aria-pressed="false"] .av { filter:grayscale(1); opacity:.7; }
+  .seat-text { display:flex; flex-direction:column; line-height:1.2; }
+  .seat-name { font-size:.8rem; font-weight:700; }
+  .seat-sub { font-size:.7rem; color:var(--muted); }
+  .seat[aria-pressed="true"] .seat-sub { color:var(--c); }
+  .utils { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  #version { font-size:.75rem; color:var(--muted); }
+  #mockbadge { font-size:.7rem; font-weight:700; letter-spacing:.04em; padding:2px 9px; border-radius:999px; background:var(--amber-bg); border:1px solid var(--amber-line); color:var(--amber-ink); }
+  .btn-clear { padding:5px 12px; border-radius:8px; border:1px solid var(--line2); background:var(--bg); font-size:.8rem; font-weight:600; }
+  .btn-clear:hover:not(:disabled) { background:var(--subtle); }
+
+  .av { width:28px; height:28px; border-radius:50%; color:#fff; font-size:.78rem; font-weight:700; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; background:var(--c, #5F6784); }
+
+  /* Feed */
+  #log { flex:1; overflow-y:auto; padding:22px 24px 28px; display:flex; flex-direction:column; align-items:center; background:linear-gradient(180deg,var(--bg),var(--subtle)); }
+  .feed { width:100%; max-width:780px; display:flex; flex-direction:column; flex:1; }
+  #msgs { display:flex; flex-direction:column; }
+
+  .empty { margin:auto; text-align:center; max-width:520px; padding:28px 12px; }
+  .empty h2 { margin:0 0 8px; font-size:1.2rem; }
+  .empty p { margin:0 0 22px; font-size:.92rem; color:var(--ink2); }
+  .examples { display:flex; flex-direction:column; gap:9px; }
+  .example { padding:12px 16px; border-radius:14px; background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow-xs); text-align:left; font-size:.88rem; font-weight:500; transition:border-color .14s, transform .12s; }
+  .example:hover:not(:disabled) { border-color:var(--line2); transform:translateY(-1px); }
+
+  .row-user { display:flex; justify-content:flex-end; margin-top:14px; }
+  .bubble-user { background:var(--navy); color:#fff; padding:10px 16px; border-radius:18px 18px 4px 18px; max-width:min(82%,540px); white-space:pre-wrap; overflow-wrap:anywhere; box-shadow:var(--shadow-xs); font-size:.92rem; }
+
+  .turn { display:flex; justify-content:center; margin:20px 0 14px; }
+  .turn span { padding:4px 13px; border-radius:999px; background:var(--subtle); border:1px solid var(--line); font-size:.74rem; font-weight:600; color:var(--ink2); }
+
+  .row-agent { display:flex; align-items:flex-end; gap:10px; margin-top:12px; }
+  .row-agent.grouped { margin-top:4px; }
+  .row-agent .spacer { width:28px; flex-shrink:0; }
+  .bubble { position:relative; background:var(--surface); border:1px solid var(--line); padding:9px 14px; border-radius:4px 18px 18px 18px; max-width:min(86%,560px); box-shadow:var(--shadow-xs); }
+  .bubble .name { font-size:.74rem; font-weight:700; margin-bottom:1px; color:var(--c); }
+  .bubble .text { white-space:pre-wrap; overflow-wrap:anywhere; font-size:.92rem; }
+  .copy { position:absolute; top:-12px; right:8px; padding:2px 9px; border-radius:6px; border:1px solid var(--line2); background:var(--surface); font-size:.72rem; font-weight:600; color:var(--ink2); opacity:0; transition:opacity .12s; box-shadow:var(--shadow-xs); }
+  .row-agent:hover .copy, .copy:focus-visible, .row-agent:focus-within .copy { opacity:1; }
+  @media (hover:none) { .copy { opacity:1; position:static; margin-top:4px; } }
+  .copy:hover { background:var(--subtle); }
+
+  .typing { display:flex; align-items:center; gap:10px; margin-top:12px; font-size:.82rem; color:var(--ink2); }
+  .typing .bubble { display:inline-flex; align-items:center; gap:10px; padding:9px 14px; }
+  .dots { display:inline-flex; gap:4px; }
+  .dots i { width:6px; height:6px; border-radius:50%; background:currentColor; animation:bounce 1.2s infinite ease-in-out; }
+  .dots i:nth-child(2) { animation-delay:.16s; } .dots i:nth-child(3) { animation-delay:.32s; }
+  @keyframes bounce { 0%,60%,100% { transform:translateY(0); opacity:.4; } 30% { transform:translateY(-3px); opacity:1; } }
+
+  /* Friendly failure notice */
+  .notice { align-self:center; width:100%; max-width:560px; margin-top:14px; padding:12px 16px; border-radius:18px; background:var(--amber-bg); border:1px solid var(--amber-line); color:var(--amber-ink); font-size:.86rem; }
+  .notice-top { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .notice p { margin:6px 0 0; }
+  .notice .details-btn { padding:3px 10px; border-radius:6px; border:1px solid var(--amber-line); background:transparent; font-size:.76rem; font-weight:600; color:var(--amber-ink); }
+  .notice .details-btn:hover { background:rgba(180,83,10,.1); }
+  .notice pre { margin:9px 0 0; padding:8px 10px; border-radius:8px; background:rgba(0,0,0,.06); font:.76rem/1.45 ui-monospace,SFMono-Regular,Menlo,monospace; white-space:pre-wrap; overflow-wrap:anywhere; max-height:200px; overflow:auto; }
+
+  /* Muse paste card */
+  #manual { margin-top:16px; padding:16px 20px; border-radius:18px; background:rgba(123,58,166,.08); border:1.5px solid #7B3AA6; box-shadow:var(--shadow-sm); }
+  #manual h3 { margin:0; font-size:.95rem; }
+  #manual .lead { margin:4px 0 0; font-size:.84rem; color:var(--ink2); }
+  #manual ol { margin:12px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:12px; counter-reset:step; }
+  #manual li { counter-increment:step; display:flex; flex-direction:column; gap:6px; font-size:.84rem; }
+  #manual li > .step-label { display:flex; align-items:center; gap:8px; font-weight:600; }
+  #manual li > .step-label::before { content:counter(step); width:22px; height:22px; border-radius:50%; background:#7B3AA6; color:#fff; font-size:.75rem; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+  #manual textarea { width:100%; border-radius:8px; border:1px solid rgba(123,58,166,.45); background:var(--surface); padding:9px 12px; resize:vertical; }
+  #mprompt { height:84px; font:.78rem/1.4 ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--ink2); }
+  #mreply { min-height:76px; font-size:.88rem; }
+  .btn-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .btn-m { padding:7px 14px; border-radius:8px; border:1px solid rgba(123,58,166,.5); background:var(--surface); font-size:.82rem; font-weight:600; align-self:flex-start; }
+  .btn-m:hover { background:var(--subtle); }
+  .btn-m.primary { background:#7B3AA6; color:#fff; border-color:#7B3AA6; }
+  .btn-m.primary:hover { background:#68308c; }
+
+  /* Composer */
+  .composer-wrap { padding:10px 24px 18px; display:flex; justify-content:center; background:var(--bg); flex-shrink:0; }
+  .composer { width:100%; max-width:780px; background:var(--surface); border:1px solid var(--line2); border-radius:18px; padding:10px 14px 8px; box-shadow:var(--shadow-sm); }
+  .composer:focus-within { border-color:var(--focus); }
+  #input { width:100%; border:none; background:transparent; resize:none; outline:none; font-size:.94rem; line-height:1.45; min-height:2.9em; max-height:7.3em; padding:2px 0; display:block; overflow-y:auto; }
+  #input::placeholder { color:var(--muted); }
+  .bar { display:flex; align-items:center; justify-content:space-between; gap:10px 12px; margin-top:6px; padding-top:6px; border-top:1px solid var(--line); flex-wrap:wrap; }
+  .turns { display:inline-flex; align-items:center; gap:7px; font-size:.78rem; color:var(--muted); }
+  #rounds { padding:5px 10px; border-radius:8px; border:1px solid var(--line2); background:var(--bg); font-size:.8rem; font-weight:600; max-width:100%; }
+  .right { display:flex; align-items:center; gap:10px; margin-left:auto; flex-wrap:wrap; }
+  .hint { font-size:.74rem; color:var(--muted); flex-basis:100%; margin:0; }
+  .btn-send { padding:7px 18px; border-radius:8px; border:1px solid var(--navy); background:var(--navy); color:#fff; font-size:.86rem; font-weight:600; }
+  .btn-send:hover:not(:disabled) { background:var(--navy-hover); }
+  .btn-send:disabled { opacity:.45; }
+  .btn-stop { padding:7px 14px; border-radius:8px; border:1px solid var(--line2); background:var(--surface); font-size:.86rem; font-weight:600; }
+  .btn-stop:hover:not(:disabled) { background:var(--subtle); }
+  .btn-stop:disabled { opacity:.45; }
+
+  @media (max-width:600px) {
+    header { padding:10px 14px; }
+    #log { padding:16px 12px 20px; }
+    .composer-wrap { padding:8px 12px 14px; }
+    .right { width:100%; justify-content:space-between; margin-left:0; }
+    .hint { flex-basis:100%; order:3; }
+  }
 </style>
 </head>
 <body>
 <header>
-  <h1>Round Table</h1>
-  <span id="agents"></span>
-  <span class="spacer"></span>
-  <span id="mockbadge" style="display:none;color:#9a6b00">MOCK MODE</span>
-  <span id="version" style="font-size:12px;color:var(--muted)" aria-label="App version"></span>
-  <button id="clear">Clear</button>
+  <div class="brand">
+    <span class="logo" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+    </span>
+    <h1>Round Table</h1>
+  </div>
+  <div class="seats" id="agents" role="group" aria-label="Who is at the table (click to include or leave out)"></div>
+  <div class="utils">
+    <span id="mockbadge" hidden>MOCK MODE</span>
+    <span id="version" aria-label="App version"></span>
+    <button type="button" class="btn-clear" id="clear">Clear</button>
+  </div>
 </header>
-<div id="log"></div>
-<div id="typing"></div>
-<div id="manual">
-  <b id="mname"></b> has no CLI. Copy the prompt, paste it into that chat, then paste the reply back here.
-  <textarea id="mprompt" readonly></textarea>
-  <button id="mcopy">Copy prompt</button>
-  <textarea id="mreply" placeholder="Paste the reply here"></textarea>
-  <button class="primary" id="msubmit">Send reply to room</button>
-  <button id="mskip">Skip</button>
+
+<div id="log">
+  <div class="feed">
+    <div id="msgs" role="log" aria-live="polite" aria-label="Conversation"></div>
+    <div id="typing" class="typing" hidden></div>
+    <section id="manual" hidden aria-labelledby="mtitle">
+      <h3 id="mtitle">Paste a reply for <span id="mname"></span></h3>
+      <p class="lead"><span id="mname2"></span> is waiting for your reply. The room pauses until you paste it or skip.</p>
+      <ol>
+        <li>
+          <span class="step-label"><label for="mprompt">Copy this prompt</label></span>
+          <textarea id="mprompt" readonly></textarea>
+          <button type="button" class="btn-m" id="mcopy">Copy prompt</button>
+        </li>
+        <li>
+          <span class="step-label"><span id="mstep2">Ask it in that chat, then paste its reply here</span></span>
+          <textarea id="mreply" aria-labelledby="mstep2" placeholder="Paste the reply here"></textarea>
+        </li>
+        <li>
+          <span class="step-label">Send it to the room, or skip</span>
+          <div class="btn-row">
+            <button type="button" class="btn-m primary" id="msubmit">Send reply to room</button>
+            <button type="button" class="btn-m" id="mskip">Skip</button>
+          </div>
+        </li>
+      </ol>
+    </section>
+  </div>
 </div>
-<footer>
-  <textarea id="input" placeholder="Ask the room. Type @Name (like @Claude) to ask specific models. Enter sends, Shift+Enter for a new line."></textarea>
-  <label>How many turns?
-    <select id="rounds"><option value="1" selected>Everyone answers once</option><option value="2">Answer, then react to each other</option><option value="3">Answer, react, then react again</option></select>
-  </label>
-  <button class="primary" id="send">Send</button>
-  <button id="stop" disabled>Stop</button>
-  <div class="hint">Everyone answers your question at the same time. With more turns, each model then reads what the others said and replies.</div>
-</footer>
+
+<div class="composer-wrap">
+  <div class="composer">
+    <label for="input" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Ask the room</label>
+    <textarea id="input" rows="2" placeholder="Ask the room. Type @Name (like @Claude) to ask specific models."></textarea>
+    <div class="bar">
+      <label class="turns">How many turns?
+        <select id="rounds"><option value="1" selected>Everyone answers once</option><option value="2">Answer, then react to each other</option><option value="3">Answer, react, then react again</option></select>
+      </label>
+      <div class="right">
+        <button type="button" class="btn-stop" id="stop" disabled>Stop</button>
+        <button type="button" class="btn-send" id="send">Send</button>
+      </div>
+        <span class="hint">Enter sends, Shift+Enter for a new line. With more turns, each model reads what the others said and replies.</span>
+    </div>
+  </div>
+</div>
+
 <script>
-const PALETTE = ['#2f6fdd','#c2570c','#2a8a5b','#8a3fb5','#b5365a','#4a7c8c'];
+// Known model colors; any other agent falls back to the palette in config order.
+const KNOWN = { Claude:'#2F6FDD', Codex:'#1F7A4F', Gemini:'#B4530A', Muse:'#7B3AA6' };
+const PALETTE = ['#b5365a','#4a7c8c','#6b5b1f','#3d5a99','#8a4b2d','#2f7a7a'];
 const colors = {};
-let agents = [], pending = [];
+let agents = [], pending = [], messages = [], busy = false;
+const typing = new Set();
+const openDetails = new Set();
 const $ = id => document.getElementById(id);
 
-function colorOf(name) { return colors[name] || '#999'; }
+const EXAMPLES = [
+  'What is a good name for a small neighbourhood bakery?',
+  'Should I learn Python or JavaScript first?',
+  'Give me a simple plan for a relaxing weekend.'
+];
+const TURN_LABELS = { 1:'Turn 1 · everyone answers', 2:'Turn 2 · reacting to each other', 3:'Turn 3 · final thoughts' };
 
-function addMessage(m) {
-  const d = document.createElement('div');
-  d.className = 'msg ' + m.role;
-  if (m.role === 'agent') d.style.borderLeftColor = colorOf(m.author);
-  const w = document.createElement('div'); w.className = 'who'; w.textContent = m.author;
-  const t = document.createElement('div'); t.textContent = m.text;
-  d.append(w, t);
-  $('log').appendChild(d);
-  $('log').scrollTop = $('log').scrollHeight;
+const INITIAL_FIXED = { Claude:'C', Codex:'X', Gemini:'G', Muse:'M' };
+const initials = {};
+function assignInitials(list) {
+  const used = new Set();
+  list.forEach(a => { if (INITIAL_FIXED[a.name]) { initials[a.name] = INITIAL_FIXED[a.name]; used.add(INITIAL_FIXED[a.name]); } });
+  list.forEach(a => {
+    if (initials[a.name]) return;
+    const letters = [...a.name.toUpperCase()].filter(c => /\S/.test(c));
+    const pick = letters.find(c => !used.has(c)) || letters[0] || '?';
+    initials[a.name] = pick; used.add(pick);
+  });
+}
+function colorOf(name) { return colors[name] || '#5F6784'; }
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function avatar(name) { const a = el('span', 'av', initials[name] || (name || '?').charAt(0).toUpperCase()); a.style.setProperty('--c', colorOf(name)); a.setAttribute('aria-hidden', 'true'); return a; }
+
+// Turn inference (client-side; the server stores no turn number): within a round (messages after a user
+// message), an agent's k-th message is treated as turn k. Skipped when only one agent spoke in the round.
+function computeTurns(list) {
+  const info = new Map(); // id -> turn number to show a divider before (only first appearance)
+  let i = 0;
+  while (i < list.length) {
+    let j = i + 1;
+    while (j < list.length && list[j].role !== 'user') j++;
+    const round = list.slice(i, j).filter(m => m.role === 'agent');
+    const authors = new Set(round.map(m => m.author));
+    if (authors.size >= 2) {
+      const count = {}, seen = new Set();
+      round.forEach(m => {
+        const k = (count[m.author] = (count[m.author] || 0) + 1);
+        if (!seen.has(k) && TURN_LABELS[k]) { seen.add(k); info.set(m.id, k); }
+      });
+    }
+    i = j;
+  }
+  return info;
 }
 
-function setBusy(b) { $('send').disabled = b; $('stop').disabled = !b; }
+function renderFailure(m) {
+  const match = /^(.+?) failed: ([\s\S]*)$/.exec(m.text || '');
+  const who = match ? match[1] : null;
+  const raw = match ? match[2] : (m.text || '');
+  const box = el('div', 'notice');
+  const top = el('div', 'notice-top');
+  top.append(el('strong', null, who ? `${who} couldn't answer.` : 'Something went wrong.'));
+  const key = m.id != null ? m.id : raw;
+  const pre = el('pre', null, raw.length > 2000 ? raw.slice(0, 2000) + '\n… (truncated)' : raw);
+  const btn = el('button', 'details-btn', 'Details');
+  btn.type = 'button';
+  const set = open => { pre.hidden = !open; btn.setAttribute('aria-expanded', String(open)); };
+  set(openDetails.has(key));
+  btn.onclick = () => { openDetails.has(key) ? openDetails.delete(key) : openDetails.add(key); set(openDetails.has(key)); };
+  top.append(btn);
+  box.append(top);
+  if (/IneligibleTierError/.test(raw)) box.append(el('p', null, 'Google no longer allows its free login in this tool. Un-tick Gemini above to stop seeing this.'));
+  box.append(pre);
+  return box;
+}
+
+function renderAgent(m, grouped) {
+  const row = el('div', 'row-agent' + (grouped ? ' grouped' : ''));
+  row.style.setProperty('--c', colorOf(m.author));
+  if (grouped) row.append(el('span', 'spacer')); else row.append(avatar(m.author));
+  const b = el('div', 'bubble');
+  if (!grouped) b.append(el('div', 'name', m.author));
+  b.append(el('div', 'text', m.text));
+  const copy = el('button', 'copy', 'Copy');
+  copy.type = 'button';
+  copy.setAttribute('aria-label', `Copy ${m.author}'s message`);
+  copy.onclick = async () => {
+    try { await navigator.clipboard.writeText(m.text); copy.textContent = 'Copied'; } catch (e) { copy.textContent = 'Copy failed'; }
+    setTimeout(() => (copy.textContent = 'Copy'), 1500);
+  };
+  b.append(copy);
+  row.append(b);
+  return row;
+}
+
+function renderMessages() {
+  const box = $('msgs');
+  const log = $('log');
+  const nearBottom = log.scrollHeight - log.scrollTop - log.clientHeight < 120;
+  box.textContent = '';
+  if (!messages.length) {
+    const e = el('div', 'empty');
+    e.append(el('h2', null, 'Ask the table anything'), el('p', null, 'Everyone you pick above answers at the same time, then they can react to each other. Try one of these to start.'));
+    const list = el('div', 'examples');
+    EXAMPLES.forEach(t => {
+      const b = el('button', 'example', t); b.type = 'button';
+      b.disabled = busy;
+      b.onclick = () => { $('input').value = t; autoGrow(); send(); };
+      list.append(b);
+    });
+    e.append(list);
+    box.append(e);
+    return;
+  }
+  const turns = computeTurns(messages);
+  let prev = null;
+  messages.forEach(m => {
+    if (m.role === 'user') {
+      const r = el('div', 'row-user'); r.append(el('div', 'bubble-user', m.text)); box.append(r); prev = null; return;
+    }
+    if (m.role === 'system') { box.append(renderFailure(m)); prev = null; return; }
+    if (turns.has(m.id)) { const d = el('div', 'turn'); d.append(el('span', null, TURN_LABELS[turns.get(m.id)])); box.append(d); prev = null; }
+    box.append(renderAgent(m, prev === m.author));
+    prev = m.author;
+  });
+  if (nearBottom || messages[messages.length - 1].role === 'user') log.scrollTop = log.scrollHeight;
+}
+
+function renderTyping() {
+  const t = $('typing');
+  if (!typing.size) { t.hidden = true; t.textContent = ''; return; }
+  const names = [...typing];
+  t.textContent = '';
+  t.hidden = false;
+  const b = el('div', 'bubble');
+  const dots = el('span', 'dots'); dots.setAttribute('aria-hidden', 'true'); dots.append(el('i'), el('i'), el('i'));
+  b.append(dots, el('span', null, `${names.join(', ')} ${names.length > 1 ? 'are' : 'is'} thinking`));
+  t.append(avatar(names[0]), b);
+  const log = $('log'); log.scrollTop = log.scrollHeight;
+}
+
+function setBusy(b) { busy = b; $('send').disabled = b; $('stop').disabled = !b; document.querySelectorAll('.example').forEach(x => (x.disabled = b)); }
 
 async function post(url, body) {
   const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
@@ -88,8 +351,11 @@ async function post(url, body) {
 
 function showManual() {
   const p = pending[0];
-  $('manual').style.display = p ? 'block' : 'none';
-  if (p) { $('mname').textContent = p.name; $('mprompt').value = p.prompt; $('mreply').value = ''; }
+  $('manual').hidden = !p;
+  if (p) {
+    $('mname').textContent = p.name; $('mname2').textContent = p.name;
+    $('mprompt').value = p.prompt; $('mreply').value = '';
+  }
 }
 
 const AGENTS_KEY = 'roundtable.agents';
@@ -102,7 +368,7 @@ function loadAgentSel() {
 function saveAgentSel() {
   try {
     const o = {};
-    document.querySelectorAll('#agents input[type=checkbox]').forEach(c => (o[c.value] = c.checked));
+    document.querySelectorAll('#agents button').forEach(c => (o[c.dataset.name] = c.getAttribute('aria-pressed') === 'true'));
     localStorage.setItem(AGENTS_KEY, JSON.stringify(o));
   } catch (e) {}
 }
@@ -110,54 +376,67 @@ function saveAgentSel() {
 async function init() {
   const s = await (await fetch('/api/state')).json();
   agents = s.agents;
-  agents.forEach((a, i) => (colors[a.name] = PALETTE[i % PALETTE.length]));
+  let n = 0;
+  assignInitials(agents);
+  agents.forEach(a => (colors[a.name] = KNOWN[a.name] || PALETTE[n++ % PALETTE.length]));
   $('version').textContent = `v${s.version} · updated ${s.updated}`;
-  $('mockbadge').style.display = s.mock ? 'inline' : 'none';
-  $('agents').innerHTML = '';
+  $('mockbadge').hidden = !s.mock;
+  $('agents').textContent = '';
   const saved = loadAgentSel();
   agents.forEach(a => {
-    const l = document.createElement('label');
-    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = saved[a.name] !== false; cb.value = a.name;
-    cb.addEventListener('change', saveAgentSel);
-    const dot = document.createElement('span'); dot.className = 'dot'; dot.style.background = colorOf(a.name);
-    l.append(cb, dot, document.createTextNode(a.name + (a.type === 'manual' ? ' (paste)' : '')));
-    $('agents').appendChild(l);
+    const b = el('button', 'seat'); b.type = 'button';
+    b.dataset.name = a.name;
+    b.style.setProperty('--c', colorOf(a.name));
+    b.setAttribute('aria-pressed', String(saved[a.name] !== false));
+    const txt = el('span', 'seat-text');
+    txt.append(el('span', 'seat-name', a.name), el('span', 'seat-sub', a.type === 'manual' ? 'you paste replies' : 'at the table'));
+    b.append(avatar(a.name), txt);
+    b.onclick = () => { b.setAttribute('aria-pressed', String(b.getAttribute('aria-pressed') !== 'true')); saveAgentSel(); };
+    $('agents').append(b);
   });
-  s.messages.forEach(addMessage);
+  messages = s.messages.slice();
+  renderMessages();
   setBusy(s.busy);
 
   const es = new EventSource('/events');
-  const typing = new Set();
   es.onmessage = e => {
     const evt = JSON.parse(e.data);
-    if (evt.type === 'message') addMessage(evt.message);
-    if (evt.type === 'typing') { evt.on ? typing.add(evt.name) : typing.delete(evt.name); $('typing').textContent = typing.size ? [...typing].join(', ') + ' thinking...' : ''; }
-    if (evt.type === 'manual') { pending.push(evt); showManual(); }
-    if (evt.type === 'idle') { setBusy(false); pending = []; showManual(); }
-    if (evt.type === 'cleared') $('log').innerHTML = '';
+    if (evt.type === 'message') { messages.push(evt.message); renderMessages(); }
+    if (evt.type === 'typing') { evt.on ? typing.add(evt.name) : typing.delete(evt.name); renderTyping(); }
+    if (evt.type === 'manual') { pending.push(evt); showManual(); if (pending.length === 1) $('log').scrollTop = $('log').scrollHeight; }
+    if (evt.type === 'idle') { setBusy(false); pending = []; typing.clear(); renderTyping(); showManual(); renderMessages(); }
+    if (evt.type === 'cleared') { messages = []; openDetails.clear(); renderMessages(); }
   };
 }
 
-$('send').onclick = async () => {
+async function send() {
+  if ($('send').disabled) return;
   const text = $('input').value.trim();
   if (!text) return;
-  const names = [...document.querySelectorAll('#agents input:checked')].map(c => c.value);
+  const names = [...document.querySelectorAll('#agents button[aria-pressed="true"]')].map(c => c.dataset.name);
   saveAgentSel();
   setBusy(true);
-  const r = await post('/api/ask', { text, agents: names, rounds: Number($('rounds').value) });
-  if (r.ok) $('input').value = ''; else setBusy(false);
-};
+  let r = {};
+  try { r = await post('/api/ask', { text, agents: names, rounds: Number($('rounds').value) }); } catch (e) { alert('Could not reach the server.'); }
+  if (r.ok) { $('input').value = ''; autoGrow(); } else setBusy(false);
+}
+function autoGrow() { const t = $('input'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 117) + 'px'; }
+$('input').addEventListener('input', autoGrow);
+$('send').onclick = send;
 $('input').addEventListener('keydown', e => {
   if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
   if (e.shiftKey && !(e.metaKey || e.ctrlKey)) return; // Shift+Enter: newline
   e.preventDefault();
-  if (!$('send').disabled) $('send').click();
+  if (!$('send').disabled) send();
 });
 $('stop').onclick = () => post('/api/stop');
 $('clear').onclick = () => confirm('Clear the whole transcript?') && post('/api/clear');
-$('mcopy').onclick = () => navigator.clipboard.writeText($('mprompt').value);
-$('msubmit').onclick = async () => { const p = pending.shift(); showManual(); await post('/api/manual', { id: p.id, text: $('mreply').value }); };
-$('mskip').onclick = async () => { const p = pending.shift(); showManual(); await post('/api/manual', { id: p.id, text: '' }); };
+$('mcopy').onclick = async () => {
+  try { await navigator.clipboard.writeText($('mprompt').value); $('mcopy').textContent = 'Copied'; } catch (e) { $('mprompt').select(); $('mcopy').textContent = 'Press Ctrl/Cmd+C'; }
+  setTimeout(() => ($('mcopy').textContent = 'Copy prompt'), 1500);
+};
+$('msubmit').onclick = async () => { const p = pending.shift(); if (!p) return; const text = $('mreply').value; showManual(); await post('/api/manual', { id: p.id, text }); };
+$('mskip').onclick = async () => { const p = pending.shift(); if (!p) return; showManual(); await post('/api/manual', { id: p.id, text: '' }); };
 init();
 </script>
 </body>

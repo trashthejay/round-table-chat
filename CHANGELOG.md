@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.9] - 2026-11-15
+### Changed
+- public/index.html: full UI redesign with messenger-style chat bubbles, seat pills at the top to pick agents, an inline Muse paste card inside the conversation, friendly "couldn't answer" notices with a Details toggle, inferred turn dividers, and a compact composer.
+
+### Added
+- server.js: the port can be overridden with the PORT environment variable (default 3737).
+
 ## [0.1.8] - 2026-11-15
 ### Changed
 - public/index.html: the page remembers which agent checkboxes were ticked (localStorage key "roundtable.agents"); agents with no saved entry default to ticked.
