@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.11] - 2026-11-15
+### Added
+- Install on Mac.command: double-click installer for macOS.
+- README.md: screenshot (docs/screenshot.png) and a "Quick start (Mac)" section.
+
+### Changed
+- public/index.html: agent replies render bold, inline code, headings and lists safely; table text is not rendered as a grid.
+
 ## [0.1.10] - 2026-11-15
 ### Changed
 - public/index.html: the header logo and browser-tab favicon now use the app icon (embedded as base64 PNG data URIs).

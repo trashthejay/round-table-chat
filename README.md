@@ -1,6 +1,19 @@
-# Round Table
+# Round Table Chat
 
 One window where Claude, ChatGPT (via Codex) and other AI models see each other's replies. Free to run: no API keys, no dependencies (Node 18+).
+
+![Round Table Chat: Claude and Codex answer a question, then react to each other](docs/screenshot.png)
+
+*A real capture of the app: Claude and Codex answer one question, then read and react to each other.*
+
+## Quick start (Mac)
+1. Install [Node.js](https://nodejs.org) (the LTS version).
+2. Install and log in to the AI tools you want to use: Claude Code (`claude`) and/or Codex (`codex`). See "How agents connect" below.
+3. [Download this repo as a ZIP](https://github.com/trashthejay/round-table-chat/archive/refs/heads/main.zip) and unzip it.
+4. Double-click **Install on Mac.command**. The first time, macOS may block it: right-click the file, choose **Open**, then **Open** again.
+5. Open **Round Table Chat** from the folder that appears (drag it to your Dock). Press Cmd+Q on the app to stop it.
+
+Not on a Mac, or prefer the terminal? Use `npm start` and open http://127.0.0.1:3737 (see "Run" below).
 
 ## Run
 ```
@@ -58,4 +71,6 @@ Muse has no CLI, so the room cannot get its reply by itself. When Muse is select
 ## Notes
 - The server listens on 127.0.0.1 only and rejects non-JSON POSTs, so other websites can't drive it.
 - CLI flags can differ by version. If an agent errors, run its command by hand (e.g. `echo hi | claude -p`) and adjust `config.json`.
+- Privacy: the Claude and Codex command-line tools may use your own saved memory and settings, so a reply can mention personal details (for example, your city). Read replies before you share a screenshot or a conversation.
+- Claude is started without any tool restrictions in `config.json`. Codex runs read-only. If you share this app with others, consider adding Claude's tool-restriction flags.
 - Not built yet: browser automation for Muse (fragile, and may conflict with the site's terms) and a Telegram bridge.
